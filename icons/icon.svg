@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#2a2e3b"/>
+      <stop offset="1" stop-color="#14161d"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="46%" r="50%">
+      <stop offset="0" stop-color="#f0a040" stop-opacity=".55"/>
+      <stop offset=".55" stop-color="#e48a1c" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#e48a1c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="236" r="230" fill="url(#halo)"/>
+  <circle cx="256" cy="214" r="150" fill="none" stroke="#f0a040" stroke-opacity=".35" stroke-width="5"/>
+  <!-- der kleine Mönch, meditierend -->
+  <g transform="translate(56 58) scale(4)">
+    <path d="M21 97 Q22 63 50 59 Q78 63 79 97 Z" fill="#e48a1c"/>
+    <path d="M33 63.5 Q52 74 71 96.5 L61 97 Q46 79 28 68 Z" fill="#b4650a"/>
+    <path d="M41 60.5 q9 6 18 0" stroke="#b4650a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M44 74 q6 -9 12 0 q-6 5 -12 0z" fill="#f3c9a2"/>
+    <circle cx="29.5" cy="42" r="4.2" fill="#f3c9a2"/><circle cx="70.5" cy="42" r="4.2" fill="#f3c9a2"/>
+    <circle cx="50" cy="40" r="21" fill="#f3c9a2"/>
+    <ellipse cx="42" cy="27.5" rx="7.5" ry="3.8" fill="#fff" opacity=".45" transform="rotate(-20 42 27.5)"/>
+    <circle cx="50" cy="31" r="1.7" fill="#e48a1c"/>
+    <path d="M38.5 42 q4 3.4 8 0 M53.5 42 q4 3.4 8 0" stroke="#1b1e27" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M46 50 q4 3.2 8 0" stroke="#1b1e27" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <circle cx="37" cy="48" r="3.2" fill="#ef7f6e" opacity=".4"/><circle cx="63" cy="48" r="3.2" fill="#ef7f6e" opacity=".4"/>
+  </g>
+</svg>
