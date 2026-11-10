@@ -267,7 +267,7 @@ function candidates() {
   for (const t of tasks) if (t.at == null || t.at <= now + 15)
     out.push({ key: 'u:' + t.key, ic: 'ph-brain', t: esc(UNI.taskTitle(t)), sub: esc(UNI.taskSub(t)), act: `data-act="u.startTask" data-key="${t.key}"`, btn: 'Lern-Session starten' });
   l.top.forEach((t, i) => { if (!t.done) out.push({ key: 'top:' + i, ic: 'ph-target', t: esc(t.t), sub: `Top ${i + 1} für heute. 50 Minuten, dann Pause.`, act: `data-act="topGo" data-i="${i}"`, btn: 'Fokus starten', alt: `<button class="btn sm ghost" data-act="topToggle" data-i="${i}"><i class="ph-duotone ph-check"></i>Schon erledigt</button>` }); });
-  if (!l.top.length && w === 'm') out.push({ key: 'top:new', ic: 'ph-target', t: 'Top 3 festlegen', sub: 'Was bringt dich heute wirklich weiter? Unten eintragen.', act: 'data-act="focusTop"', btn: 'Eintragen' });
+  if (!l.top.length) out.push({ key: 'top:new', ic: 'ph-target', t: 'Deine 3 Aufgaben für heute', sub: esc(suggestions().slice(0, 3).map(x => x.t).join(' · ')), act: 'data-act="sugAll"', btn: 'Übernehmen', alt: '<button class="btn sm ghost" data-act="focusTop">Selbst festlegen</button>' });
   for (const t of tasks) if (t.at != null && t.at > now + 15)
     out.push({ key: 'u:' + t.key, ic: 'ph-brain', t: esc(UNI.taskTitle(t)), sub: `Geplant ab ${UNI.fmtHM(t.at)}. Früher anfangen geht immer.`, act: `data-act="u.startTask" data-key="${t.key}"`, btn: 'Jetzt schon starten' });
   if (S.mk.on) {
@@ -424,7 +424,7 @@ function dayCard() {
   return `<section class="card day-card"><div class="card-head"><h2><span class="hic"><i class="ph-duotone ph-calendar-dots"></i></span>Heute</h2><div class="row" style="gap:6px"><button class="mini" data-act="ownAdd" aria-label="Termin eintragen" title="Termin eintragen"><i class="ph-duotone ph-plus"></i></button><button class="link" data-act="calSheet">Kalender</button></div></div>
     ${rows.length ? `<div class="tl-list">${rows.map(r => r.h).join('')}</div>` : `<p class="muted">Nichts Festes heute. Termin mit + eintragen oder unter Kalender deinen iPhone-Kalender verbinden.</p>`}
     ${ex.length ? `<div class="exams-row">${ex.map(x => { const d = UNI.diffD(today(), x.date); return `<button class="pill-ex" data-act="u.open" data-v="faecher" style="--c:${UNI.sColor(x.sid)}"><b class="num">${d}</b> ${d === 1 ? 'Tag' : 'Tage'} bis ${esc(x.type || 'Prüfung')} ${esc(UNI.sName(x.sid))}</button>`; }).join('')}</div>` : ''}
-    ${setup ? `<button class="btn sm block-btn" data-act="u.open" data-v="heute"><i class="ph-duotone ph-graduation-cap"></i>Uni einrichten: Fächer, Prüfungen, Stundenplan</button>` : ''}
+    ${setup ? `<button class="btn sm block-btn" data-act="u.open" data-v="heute"><i class="ph-duotone ph-graduation-cap"></i>Uni einrichten</button>` : ''}
   </section>`;
 }
 /* ---------- Heute: Briefing, Kalender, Gewohnheiten ---------- */
@@ -470,11 +470,41 @@ function habitStrip() {
     ${routines}
   </section>`;
 }
+/* ---------- Tagesaufgaben: jeden Tag drei Vorschläge aus deinen Bereichen ---------- */
+const POOL = {
+  p4: ['3 mögliche Kunden für P4 anschreiben', 'Eine Firma wegen Mitarbeitergeschenken anrufen', 'Offene Bestellungen und Nachrichten beantworten', 'Ein neues Produktfoto machen', 'Einen Post für P4 vorbereiten', 'Mit deinem Kollegen 15 Min die Zahlen der Woche anschauen', 'Die Beschreibung eines Bestsellers verbessern'],
+  ord: ['Schreibtisch komplett freiräumen', 'Eine Ladung Wäsche waschen', 'Küche 10 Minuten aufräumen', 'Downloads und Desktop am Laptop aufräumen', 'Kühlschrank checken, Einkaufsliste schreiben', 'Zimmer 10 Minuten aufräumen', 'Rucksack ausräumen und für morgen packen'],
+  uni: ['Eine Altklausur-Aufgabe rechnen', 'Karteikarten zum letzten Thema schreiben', 'Die letzte Vorlesung in 5 Sätzen zusammenfassen']
+};
+function suggestions() {
+  const k = today(), n = Math.floor(pdk(k).getTime() / 864e5), pick = (a, o = 0) => a[(n + o) % a.length];
+  const out = [];
+  // Uni: Thema der nächsten Klausur, sonst allgemeine Lernaufgabe
+  const ex = UNI.futureExams().filter(x => x.date >= k)[0];
+  if (ex) {
+    const s = UNI.S().subjects.find(x => x.id === ex.sid), top = s && (s.topics || []).find(t => !t.done);
+    const d = UNI.diffD(k, ex.date);
+    out.push({ t: top ? `${s.name}: ${top.t} durcharbeiten` : `${UNI.sName(ex.sid)}: ${pick(POOL.uni)}`, ic: 'ph-graduation-cap', c: 'lapis', why: `Klausur in ${d} ${d === 1 ? 'Tag' : 'Tagen'}` });
+  } else if (UNI.hasSubjects()) out.push({ t: pick(POOL.uni), ic: 'ph-graduation-cap', c: 'lapis', why: 'Studium' });
+  else out.push({ t: 'Deine Klausuren mit Datum unter Uni eintragen', ic: 'ph-graduation-cap', c: 'lapis', why: 'Studium, einmalig' });
+  out.push({ t: pick(POOL.p4, 3), ic: 'ph-storefront', c: 'terra', why: 'P4: etwas, das Geld bringt' });
+  if (S.work.on && wdOfK(k) !== 'sa' && wdOfK(k) !== 'so') { const w = workCalc(); if (w.left > 0) out.push({ t: `${Math.min(8, Math.ceil(w.left / Math.max(1, 5 - ((pdk(k).getDay() + 6) % 7))))} Std Werkstudent arbeiten`, ic: 'ph-briefcase', c: 'slate', why: `noch ${fh(w.left)} diese Woche` }); }
+  out.push({ t: wdOfK(k) === 'so' ? 'Woche planen: 3 Ergebnisse festlegen, Ideen durchgehen' : pick(POOL.ord, 5), ic: wdOfK(k) === 'so' ? 'ph-calendar-check' : 'ph-broom', c: 'sage', why: wdOfK(k) === 'so' ? 'Sonntag' : 'Ordnung' });
+  const have = new Set(L().top.map(t => t.t));
+  return out.filter(x => !have.has(x.t)).slice(0, 4);
+}
+function sugHTML() {
+  const top = L().top; if (top.length >= 3) return '';
+  const s = suggestions(); if (!s.length) return '';
+  return `<div class="sug"><div class="sug-head"><b>Vorschläge für heute</b>${!top.length ? `<button class="link" data-act="sugAll">Alle übernehmen</button>` : ''}</div>
+    ${s.slice(0, 3 - top.length + (top.length ? 0 : 1)).map((x, i) => `<button class="sug-item" style="--sc:var(--${x.c === 'slate' ? 'muted' : x.c + '-d'})" data-act="sugAdd" data-t="${esc(x.t)}"><i class="ph-duotone ${x.ic}"></i><span>${esc(x.t)}<small>${esc(x.why)}</small></span><i class="ph-duotone ph-plus-circle plus"></i></button>`).join('')}</div>`;
+}
 function top3Card() {
   const top = L().top;
   return `<section class="card top3"><div class="card-head"><h2><span class="hic"><i class="ph-duotone ph-target"></i></span>Top 3</h2><span class="muted small num">${top.filter(t => t.done).length}/${top.length || 3}</span></div>
     ${top.map((t, i) => `<div class="slot ${t.done ? 'done' : ''}"><button class="n" data-act="topToggle" data-i="${i}">${t.done ? '<i class="ph-duotone ph-check"></i>' : i + 1}</button><button class="txt" data-act="topToggle" data-i="${i}">${esc(t.t)}</button><button class="x-btn" data-act="topDel" data-i="${i}" aria-label="Entfernen"><i class="ph-duotone ph-x"></i></button></div>`).join('')}
     ${top.length < 3 ? `<form class="slot" data-form="top"><span class="n">${top.length + 1}</span><input id="topIn" class="empty-in" name="t" autocomplete="off" placeholder="${top.length ? 'Und was noch?' : 'Was bringt dich heute wirklich weiter?'}"><button class="add-btn" style="width:36px;height:36px;font-size:16px" aria-label="Hinzufügen"><i class="ph-duotone ph-plus"></i></button></form>` : ''}
+    ${sugHTML()}
   </section>`;
 }
 function phoneLine() {
@@ -496,7 +526,7 @@ function ownSheet() {
   openSheet(`${sheetHead('Termin eintragen')}
   <form class="form" data-form="own" style="display:grid;gap:10px">
     <label class="f">Was?<input class="input" name="t" placeholder="z. B. Meeting mit Kunde, Cold Calling" autocomplete="off" autofocus></label>
-    <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px"><label class="f">Tag<input class="input" type="date" name="d" value="${today()}"></label><label class="f">Von<input class="input" type="time" name="s" value="${pad(Math.min(23, new Date().getHours() + 1))}:00"></label><label class="f">Bis<input class="input" type="time" name="e"></label></div>
+    <label class="f">Tag<input class="input" type="date" name="d" value="${today()}"></label><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px"><label class="f">Von<input class="input" type="time" name="s" value="${pad(Math.min(23, new Date().getHours() + 1))}:00"></label><label class="f">Bis<input class="input" type="time" name="e"></label></div>
     <button class="btn primary block"><i class="ph-duotone ph-plus"></i>Eintragen</button>
   </form>`);
 }
@@ -1450,6 +1480,8 @@ function act(a, el) {
   if (a.startsWith('u.')) return UNI.act(a.slice(2), el);
   switch (a) {
     case 'skip': ui.skip.add(d.key); return render();
+    case 'sugAdd': { const top = L().top; if (top.length >= 3 || top.some(x => x.t === d.t)) return; top.push({ t: d.t, done: false }); buzz(); return save(); }
+    case 'sugAll': { const top = L().top; for (const x of suggestions()) { if (top.length >= 3) break; if (!top.some(y => y.t === x.t)) top.push({ t: x.t, done: false }); } buzz(); toast('Deine 3 für heute stehen.'); return save(); }
     case 'skipReset': ui.skip.clear(); return render();
     case 'med': { const l = L(); const i = l.meds.indexOf(d.id); if (i >= 0) l.meds.splice(i, 1); else { l.meds.push(d.id); buzz(); if (medsActive().every(m => l.meds.includes(m.id))) toast('Genommen. Abgehakt für heute.'); } return save(); }
     case 'medsEdit': return medsSheet();

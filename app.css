@@ -982,3 +982,43 @@ h2 { font-size: 21px; }
 .hab-i { width: 36px; height: 36px; font-size: 18px; border-radius: 12px; }
 .hab small { font-size: 10px; }
 .work-add .chip { padding: 6px 11px; }
+
+/* ===== Wie eine echte App: nichts darf seitlich rausstehen ===== */
+html, body { max-width: 100%; overflow-x: hidden; }
+#view, .sheet, .onb, main { overflow-x: clip; }
+main, .app { min-width: 0; max-width: 100%; }
+.card, .monk, .now, section, .tl-main, .t { min-width: 0; }
+.card-head { flex-wrap: wrap; row-gap: 8px; }
+.card-head h2 { min-width: 0; }
+.btn { max-width: 100%; }
+.block-btn { white-space: normal; text-align: center; line-height: 1.25; }
+/* Formularfelder dürfen schrumpfen (Datum/Uhrzeit sind am iPhone sonst breiter als der Platz) */
+.input, select.input, input[type="date"], input[type="time"] { min-width: 0; max-width: 100%; }
+.f, .sheet .f, label.f { min-width: 0; }
+.sheet .two, .sheet .three, .geld .three, .onb .two, .onb .three { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
+.sheet .two > *, .sheet .three > *, .sheet [style*="grid-template-columns"] > * { min-width: 0; }
+.lk .days-pick { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.lk .dp button, .lk .dp { min-width: 0; width: 100%; }
+.days-row { min-width: 0; } .dchip { min-width: 0; }
+.spend-form { grid-template-columns: 78px minmax(0, 1fr) auto; }
+form[data-form="wish"].spend-form { grid-template-columns: minmax(0, 1fr) 80px auto; }
+.hbar { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; }
+.row { min-width: 0; }
+.toast { max-width: calc(100vw - 32px); bottom: calc(96px + env(safe-area-inset-bottom)); }
+
+/* Tagesaufgaben-Vorschläge */
+.sug { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); display: grid; gap: 8px; }
+.sug-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sug-head b { font-size: 13px; color: var(--muted); font-weight: 750; }
+.sug-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 14px; background: var(--bg); font-weight: 650; font-size: 14px; color: var(--text); }
+.sug-item i:first-child { font-size: 18px; color: var(--sc, var(--accent-deep)); flex: none; }
+.sug-item span { flex: 1; min-width: 0; } .sug-item small { display: block; font-size: 11px; color: var(--muted); font-weight: 650; }
+.sug-item .plus { font-size: 18px; color: var(--accent-deep); }
+
+/* Blätter: lange Knopftexte umbrechen, Raster dürfen schrumpfen */
+.sheet .btn, .btn.block { white-space: normal; text-align: center; line-height: 1.25; }
+.sheet .set-sec, .sheet .form, .sheet .f, .sheet select, .sheet input, .sheet textarea { min-width: 0; }
+.lk .two, .lk .three, .lk .day-times { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important; }
+.lk .days-pick { grid-template-columns: repeat(7, minmax(0, 1fr)) !important; }
+.lk .dp button { font-size: 13px; padding: 10px 0; }
+.lk .dt { min-width: 0; } .lk .dt .input, .lk .input.sm { min-width: 0; max-width: 100%; width: 100%; }
